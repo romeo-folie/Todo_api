@@ -1,3 +1,5 @@
+require('./config/config');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
@@ -9,12 +11,12 @@ const {ObjectID} = require('mongodb');
 
 var app = express();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 //middleware
 app.use(bodyParser.json());
 
-//GET /todos
+//POST /todos
 app.post('/todos',(req, res)=>{
   var todo = new Todo({
     text: req.body.text,
@@ -26,7 +28,7 @@ app.post('/todos',(req, res)=>{
   });
 });
 
-//POST /todos
+//GET /todos
 app.get('/todos', (req,res)=>{
   Todo.find().then((todos)=>{
     res.send({todos})
@@ -88,11 +90,25 @@ app.patch('/todos/:id', (req, res)=>{
   Todo.findByIdAndUpdate(id,{$set: body}, {new: true}).then((todo)=>{
     if(!todo){
     return res.status(404).send();
-    } 
+    }
     res.status(200).send({todo});
-
   }).catch((e)=>{
     res.status(400).send();
+  });
+});
+
+//POST /users
+app.post('/users', (req, res)=>{
+  var body = _.pick(req.body, ['email', 'password']);
+
+  var user = new User(body);
+
+  user.save().then((user) =>{
+    user.generateAuthToken();
+  }).then((token)=>{
+    res.header('x-auth',token).status(200).send(user)
+  }).catch((e)=>{
+    res.status(400).send(e);
   });
 });
 
