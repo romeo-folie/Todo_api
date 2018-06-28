@@ -54,7 +54,6 @@ UserSchema.methods.generateAuthToken = function (){
   });
 };
 
-//instance method
 UserSchema.methods.removeToken = function(token){
   var user = this;
   return user.update({
