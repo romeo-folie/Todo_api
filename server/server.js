@@ -105,8 +105,8 @@ app.post('/users', (req, res)=>{
 
   var user = new User(body);
 
-  user.save().then((user) =>{
-    user.generateAuthToken();
+  user.save().then(() =>{
+    return user.generateAuthToken();
   }).then((token)=>{
     res.header('x-auth',token).status(200).send(user)
   }).catch((e)=>{
@@ -131,6 +131,16 @@ app.post('/users/login', (req, res)=>{
 
 app.get('/users/me', authenticate, (req, res)=>{
   res.send(req.user);
+});
+
+
+//LOGOUT
+app.delete('/users/me/token', authenticate, (req, res) => {
+  req.user.removeToken(req.token).then(()=>{
+    res.status(200).send();
+  }, ()=>{
+    res.status(400).send();
+  })
 });
 
 
